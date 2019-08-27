@@ -85,6 +85,20 @@
 		<defaultValue>*%*%*%*%*</defaultValue>
 		<description>Value of this property is used to filter objects pulled from parent.</description>
 	</globalProperty>
-
+	<globalProperty>
+		<property>atomfeed.filter.location.address.fields</property>
+		<description>
+			A percent(%) separated list of person_address table fields to be used for location filter. Possible values are
+			country, state_province, county_district, city_village, postal_code, address1, address2, address3, address4, address5,
+			address6, latitude, longtude. The default value is country%state_province%county_district%city_village%postal_code.
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>atomfeed.filter.location.excluded.classes</property>
+		<defaultValue>Patient</defaultValue>
+		<description>
+			Comma separated list of domain classes excluded in the location filtering, values can be Patient, Visit, Encounter, Obs
+		</description>
+	</globalProperty>
 </module>
 

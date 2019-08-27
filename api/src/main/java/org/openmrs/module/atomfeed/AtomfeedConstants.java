@@ -20,5 +20,7 @@ public final class AtomfeedConstants {
 
     public static final class FilterProperties {
         public static final String PREFERRED_LOCATION_FILTER = "atomfeed.filter.location";
+        public static final String PREFERRED_LOCATION_ADDRESS_FIELDS = "atomfeed.filter.location.address.fields";
+        public static final java.lang.String LOCATION_EXCLUDED_CLASSES = "";
     }
 }

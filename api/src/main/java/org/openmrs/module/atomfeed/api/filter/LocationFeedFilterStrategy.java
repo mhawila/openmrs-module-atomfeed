@@ -6,16 +6,23 @@ import org.openmrs.Encounter;
 import org.openmrs.Visit;
 import org.openmrs.Obs;
 import org.openmrs.PersonAddress;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.AtomfeedConstants;
 import org.openmrs.module.atomfeed.api.exceptions.AtomfeedException;
 import org.openmrs.module.atomfeed.api.utils.FeedFilterUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.xml.bind.JAXBException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component("atomfeed.locationFeedFilterStrategy")
 public class LocationFeedFilterStrategy extends FeedFilterStrategy implements GenericFeedFilterStrategy {
+	@Autowired
+	private AdministrationService administrationService;
 
 	@Override
 	public String createFilterFeed(OpenmrsObject object) {
@@ -37,13 +44,13 @@ public class LocationFeedFilterStrategy extends FeedFilterStrategy implements Ge
 	}
 
 	private String extractFilter(OpenmrsObject object) {
-		if (object instanceof Patient) {
+		if (object instanceof Patient && !classExcluded("Patient")) {
 			return extractLocationFilterFromPatient((Patient) object);
-		} else if (object instanceof Encounter) {
+		} else if (object instanceof Encounter && !classExcluded("Encounter")) {
 			return extractLocationFilterFromEncounter((Encounter) object);
-		} else if (object instanceof Visit) {
+		} else if (object instanceof Visit && !classExcluded("Visit")) {
 			return extractLocationFilterFromVisit((Visit) object);
-		} else if (object instanceof Obs) {
+		} else if (object instanceof Obs && !classExcluded("Obs")) {
 			return extractLocationFilterFromObs((Obs) object);
 		} else {
 			return null;
@@ -66,7 +73,7 @@ public class LocationFeedFilterStrategy extends FeedFilterStrategy implements Ge
 	}
 
 	private String getLocationFilterProperty() {
-		return Context.getAdministrationService().getGlobalProperty(AtomfeedConstants.FilterProperties.PREFERRED_LOCATION_FILTER);
+		return administrationService.getGlobalProperty(AtomfeedConstants.FilterProperties.PREFERRED_LOCATION_FILTER);
 	}
 
 	private String extractLocationFilterFromPatient(Patient patient) {
@@ -74,7 +81,8 @@ public class LocationFeedFilterStrategy extends FeedFilterStrategy implements Ge
 		if (personAddress == null) {
 			return null;
 		}
-		return FeedFilterUtil.createLocationFilter(personAddress);
+		String addressFields = administrationService.getGlobalProperty(AtomfeedConstants.FilterProperties.PREFERRED_LOCATION_ADDRESS_FIELDS);
+		return FeedFilterUtil.createLocationFilter(personAddress, addressFields);
 	}
 
 	private String extractLocationFilterFromEncounter(Encounter encounter) {
@@ -99,5 +107,14 @@ public class LocationFeedFilterStrategy extends FeedFilterStrategy implements Ge
 			return null;
 		}
 		return extractLocationFilterFromEncounter(encounter);
+	}
+
+	private boolean classExcluded(String clazz) {
+		String excluded = administrationService.getGlobalProperty(AtomfeedConstants.FilterProperties.LOCATION_EXCLUDED_CLASSES);
+		if(!StringUtils.hasLength(excluded)) {
+			return false;
+		}
+		List<String> classes = Arrays.asList(excluded.toLowerCase().split(","));
+		return classes.contains(clazz.toLowerCase());
 	}
 }

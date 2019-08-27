@@ -11,6 +11,8 @@ import org.openmrs.Encounter;
 import org.openmrs.Visit;
 import org.openmrs.Obs;
 import org.openmrs.PersonAddress;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.module.atomfeed.AtomfeedConstants;
 import org.openmrs.module.atomfeed.api.filter.FeedFilter;
 import org.openmrs.module.atomfeed.api.filter.LocationFeedFilterStrategy;
 import org.openmrs.module.atomfeed.api.service.XMLParseService;
@@ -34,11 +36,16 @@ public class LocationFeedFilterStrategyTest {
 	@Mock
 	private XMLParseService xmlParseService;
 
+	@Mock
+	private AdministrationService administrationService;
+
 	@Before
 	public void setUp() throws JAXBException {
 		MockitoAnnotations.initMocks(this);
 		when(xmlParseService.createXMLFromFeedFilter(any(FeedFilter.class))).thenReturn(FEED_FILTER_XML);
 		when(xmlParseService.createFeedFilterFromXMLString(FEED_FILTER_XML)).thenReturn(new FeedFilter(BEAN_NAME, FILTER));
+
+		when(administrationService.getGlobalProperty(AtomfeedConstants.FilterProperties.LOCATION_EXCLUDED_CLASSES)).thenReturn("");
 	}
 
 	@Test
